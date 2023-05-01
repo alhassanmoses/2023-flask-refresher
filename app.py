@@ -1,12 +1,14 @@
 import os
 from flask import Flask
 from flask_smorest import Api
+from flask_jwt_extended import JWTManager
 
 from db import db
 import models
 
 from resources.item import item_api as ItemBlueprint
 from resources.store import store_api as StoreBlueprint
+from resources.tag import tag_api as TagBlueprint
 
 
 def create_app(db_url=None):
@@ -25,6 +27,7 @@ def create_app(db_url=None):
         "DATABASE_URL", "sqlite:///data.db"
     )
     app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+
     db.init_app(app)
 
     api = Api(app)
@@ -34,5 +37,6 @@ def create_app(db_url=None):
 
     api.register_blueprint(ItemBlueprint)
     api.register_blueprint(StoreBlueprint)
+    api.register_blueprint(TagBlueprint)
 
     return app
