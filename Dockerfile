@@ -5,7 +5,7 @@ COPY requirements.txt .
 RUN pip install --no-cache-dir  --upgrade -r requirements.txt
 RUN pip install flask
 COPY . .
-CMD [ "gunicorn", "--bind", "0.0.0.0:80", "app:create_app()"]
+CMD [ "/bin/bash", "docker-entrypoint.sh"]
 # docker build -t [flask-rest-apis] [.]
 # ================tag name===============================
 # ==================================directory to locate dockerfile in===============================
