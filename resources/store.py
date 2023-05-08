@@ -1,6 +1,7 @@
 from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
+from flask_jwt_extended import jwt_required
 
 from db import db
 from schemas import StoreSchema
@@ -11,8 +12,9 @@ from sqlalchemy.exc import SQLAlchemyError, IntegrityError
 store_api = Blueprint("stores", __name__, description="Operations on stores.")
 
 
-@store_api.route("/store/<string:store_id>")
+@store_api.route("/store/<int:store_id>")
 class Store(MethodView):
+    @jwt_required()
     @store_api.response(200, StoreSchema)
     def get(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
@@ -29,6 +31,7 @@ class Store(MethodView):
 
 @store_api.route("/store")
 class Store(MethodView):
+    @jwt_required()
     @store_api.arguments(StoreSchema)
     @store_api.response(201, StoreSchema)
     def post(self, store_data):
@@ -44,6 +47,7 @@ class Store(MethodView):
 
         return store
 
+    @jwt_required()
     @store_api.response(200, StoreSchema(many=True))
     def get(self):
         return StoreModel.query.all()

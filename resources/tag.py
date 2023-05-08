@@ -2,6 +2,7 @@ from flask import request
 from flask.views import MethodView
 from flask_smorest import Blueprint, abort
 from sqlalchemy.exc import SQLAlchemyError
+from flask_jwt_extended import jwt_required
 
 from db import db
 from schemas import TagSchema, TagAndItemSchema
@@ -10,14 +11,16 @@ from models import TagModel, StoreModel, ItemModel
 tag_api = Blueprint("Tags", "tags", description="Operates on tags")
 
 
-@tag_api.route("/store/<string:store_id>/tag")
+@tag_api.route("/store/<int:store_id>/tag")
 class TagsInStore(MethodView):
+    @jwt_required()
     @tag_api.response(200, TagSchema(many=True))
     def get(self, store_id):
         store = StoreModel.query.get_or_404(store_id)
 
         return store.tags.all()
 
+    @jwt_required()
     @tag_api.arguments(TagSchema)
     @tag_api.response(201, TagSchema)
     def post(self, tag_data, store_id):
@@ -36,14 +39,16 @@ class TagsInStore(MethodView):
         return tag
 
 
-@tag_api.route("/tag/<string:tag_id>")
+@tag_api.route("/tag/<int:tag_id>")
 class Tag(MethodView):
+    @jwt_required()
     @tag_api.response(200, TagSchema)
     def get(self, tag_id):
         tag = TagModel.query.get_or_404(tag_id)
 
         return tag
 
+    @jwt_required(fresh=True)
     @tag_api.response(
         202,
         description="Deletes a tag if no items is linked with it.",
@@ -71,8 +76,9 @@ class Tag(MethodView):
         return tag
 
 
-@tag_api.route("/item/<string:item_id>/tag/<string:tag_id>")
+@tag_api.route("/item/<int:item_id>/tag/<int:tag_id>")
 class LinkTagsToItem(MethodView):
+    @jwt_required()
     @tag_api.response(201, TagSchema)
     def post(self, tag_id, item_id):
         item = ItemModel.query.get_or_404(item_id)
@@ -92,8 +98,9 @@ class LinkTagsToItem(MethodView):
         return tag
 
 
-@tag_api.route("/item/<string:item_id>/tag/<string:tag_id>")
+@tag_api.route("/item/<int:item_id>/tag/<int:tag_id>")
 class LinkTagsToItem(MethodView):
+    @jwt_required(fresh=True)
     @tag_api.response(200, TagAndItemSchema)
     def delete(self, tag_id, item_id):
         item = ItemModel.query.get_or_404(item_id)
